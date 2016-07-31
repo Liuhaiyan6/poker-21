@@ -3,60 +3,106 @@
  */
 let _ = require('lodash');
 
-function dealString1(inputs1) {
-   return  _.split(inputs,'-');
+
+function winner(inputs1, inputs2) {
+
+    let charArray1 = dealString(inputs1);
+    let charArray2 = dealString(inputs2);
+
+    let sumPart1 = otherSummations(charArray1);
+    let sumPart2 = otherSummations(charArray2);
+
+    let sum1 = dealA(charArray2, sumPart1);
+    let sum2 = dealA(charArray2, sumPart2);
+
+    let Winner = comparePokerAB(sum1, sum2);
+    return Winner;
 }
 
-function dealString2(inputs2) {
-    return  _.split(inputs,'-');
-}
+function dealString(inputs) {
+    return charArray = _.split(inputs, '-');
 
 
-function  sumPart(charArray1) {
-    let charArray1=_.chain(charArray1)
-        .filter(x=>x!=='A')
-        .map(x=>{
-            if(x==='J'||x==='Q'||x==='K'){
-                 return _.chain (x).replace(x,10)
-                     .value();
-            }
-                else{
-                    return(x);
+    function otherSummations(charArray) {
+        let a = _.chain(charArray).filter(x=> x !== 'A')
+            .map(x=> {
+                if (x = ['J', 'Q', 'K']) {
+                    return 10;
                 }
-        })
-        .value();
-    return _.(charArray1).map(x=>_.parseInt(x)).sum();
+                else {
+                    return x;
+                }
+            }).value();
+        return sumPart = _(a).map(x=> _.parseInt(x)).sum();
+    }
 }
 
-function dealStringArrayA(charArray1,sumPart){
-    let  a= _.chain(charArray1);
-    _.filter(x=>x==='A')
+
+function dealA(charArray, sumPart) {
+    let a = _.chain(charArray);
+    _.filter(x=>x === 'A')
         .value();
-     let lengthA = a.length;
-    let  partA=21-sumPart;
-    if(partA<0){
+    let lengthA = a.length;
+    let partA = 21 - sumPart;
+    if (partA < 0) {
         return 'over!';
-    }else{
+    } else {
         let sumPartA;
-        let sum;
-        if(_.floor(partA%11===0)){
-            sumPartA =lengthA +1;
-            sum=sumPart+sumPartA;
+        let sum1;
+        if (_.floor(partA % 11 === 0)) {
+            sumPartA = lengthA1 + 1;
+            sum = sumPart + sumPartA;
             return sum;
-        }else{
-            sum=11+(lengthA-1);
-            sum=sumPart+sumPartA;
+        } else {
+            sumPartA = 11 + (lengthA - 1);
+            sum = partSum + sumPartA;
             return sum;
         }
     }
 }
 
 
+function comparePokerAB(sum1, sum2, inputs1, inputs2) {
+    if (sum1 > 21 && sum2 > 21) {
+        return 'A and B are drawer';
+    } else {
+        if (sum1 === sum2 && inputs1.length > inputs2.length) {
+            return 'A is winner'
+        }
+        if (sum1 === sum2 && inputs1.length < inputs2.length) {
+            return 'B is winner'
+        }
+        if (sum1 === sum2 && inputs1.length === inputs2.length) {
+            return 'A and B are drawer';
+        } else {
+            if (sum1 < sum2 && inputs1.length < inputs2.length) {
+                return 'B is winner';
 
+            }
+            if (sum1 < sum2 && inputs1.length > inputs2.length) {
+                return 'B is winner';
 
+            }
+            if (sum1 > sum2 && inputs1.length > inputs2.length) {
+                return 'A is winner';
+            }
+            if (sum1 > sum2 && inputs1.length < inputs2.length) {
+                return 'B is winner';
+            }
+            else {
+                return 'A is winner';
+            }
+        }
+
+    }
+}
 
 module.exports = {
-    dealString: dealString
+    dealString: dealString,
+    otherSummations: otherSummations,
+    dealA: dealA,
+    comparePokerAB: comparePokerAB,
+
 };
 
 
