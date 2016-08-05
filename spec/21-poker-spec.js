@@ -1,186 +1,136 @@
-/**
- * Created by amber on 16-7-29.
- */
 'use strict';
-let {sumPart, dealA, comparePokerAB} =require("../src/21-point.js");
+let {
+    getCards,
+    convertJkqToNumberCards,
+    getPointAndCount,
+    getComparedResult,
+    printWinner
+} = require('../src/21-point.js');
+
+describe('poker-21', function () {
+
+    it('should get cards from input', function () {
+        let input = 'A-3-J-Q-7';
+        let cards = getCards(input);
+        let expected = ['A', '3', 'J', 'Q', '7'];
+        expect(cards).toEqual(expected)
+    });
+
+    describe('convertJkqToNumberCards', ()=> {
+        it('should convert J,K,Q to 10', function () {
+            let formattedInput = ['4', '2', 'Q', 'J', 'K'];
+            let normalPoints = convertJkqToNumberCards(formattedInput);
+            let expected = ['4', '2', '10', '10', '10'];
+            expect(normalPoints).toEqual(expected);
+        });
+
+        it('should keep A unchanged', function () {
+            let formattedInput = ['A', '2'];
+            let normalPoints = convertJkqToNumberCards(formattedInput);
+            let expected = ['A', '2'];
+            expect(normalPoints).toEqual(expected)
+        });
+    });
 
 
-describe('#1 sumPart', function () {
-    it('sumPart', function () {
-        let inputs = ['2','5','9'];
-        let sumParts = sumPart(inputs);
-        let printParts=16;
-        expect(sumParts).toEqual(printParts);
-    })
+    describe('getPointAndCount', ()=> {
+        it('should get point and count for cards 2~10', function () {
+            let numberCards = ['2', '5', '10'];
+            let pointAndCount = getPointAndCount(numberCards);
+            let expected = {
+                point: 17,
+                count: 3
+            };
+            expect(pointAndCount).toEqual(expected)
+        });
+
+        it('should get point and count when considering A as 1', function () {
+            let normalPoints = ['A', '2', '3', '4', '10'];
+            let pointAndCount = getPointAndCount(normalPoints);
+            let expected = {
+                point: 20,
+                count: 5
+            };
+            expect(pointAndCount).toEqual(expected)
+        });
+
+        it('should get point and count when considering A as 11', function () {
+            let normalPoints = ['A', '2', '3', '4'];
+            let pointAndCount = getPointAndCount(normalPoints);
+            let expected = {
+                point: 20,
+                count: 4
+            };
+            expect(pointAndCount).toEqual(expected);
+        });
+
+        it('should get point and count for multiple A cards', function () {
+            let cards = ['A', '2', 'A', '3', '4', 'A'];
+            let pointAndCount = getPointAndCount(cards);
+            let expected = {
+                point: 12,
+                count: 6
+            };
+            expect(pointAndCount).toEqual(expected)
+        });
+
+    });
+
+    describe('getCompareResult', ()=> {
+        describe('at least one >21', ()=> {
+            it('both > 21', function () {
+                let aPointAndCount = {point: 22, count: 4};
+                let bPointAndCount = {point: 28, count: 4};
+                let compareResult = getComparedResult(aPointAndCount, bPointAndCount);
+                let expected = 'tied';
+                expect(compareResult).toEqual(expected)
+            });
+            it('A > 21', function () {
+                let aPointAndCount = {point: 22, count: 4};
+                let bPointAndCount = {point: 1, count: 4};
+                let compareResult = getComparedResult(aPointAndCount, bPointAndCount);
+                let expected = 'B won';
+                expect(compareResult).toEqual(expected)
+            });
+            it('B > 21', function () {
+                let aPointAndCount = {point: 1, count: 4};
+                let bPointAndCount = {point: 22, count: 4};
+                let compareResult = getComparedResult(aPointAndCount, bPointAndCount);
+                let expected = 'A won';
+                expect(compareResult).toEqual(expected)
+            });
+        });
+
+        describe('both <= 21', ()=> {
+            it('A > B', ()=> {
+                let aPointAndCount = {point: 21, count: 4};
+                let bPointAndCount = {point: 20, count: 4};
+                let compareResult = getComparedResult(aPointAndCount, bPointAndCount);
+                let expected = 'A won';
+                expect(compareResult).toEqual(expected)
+            });
+            it('A < B', ()=> {
+                let aPointAndCount = {point: 20, count: 4};
+                let bPointAndCount = {point: 21, count: 4};
+                let compareResult = getComparedResult(aPointAndCount, bPointAndCount);
+                let expected = 'B won';
+                expect(compareResult).toEqual(expected)
+            });
+            it('A == B, and count of A > count of B', ()=> {
+                let aPointAndCount = {point: 20, count: 4};
+                let bPointAndCount = {point: 20, count: 3};
+                let compareResult = getComparedResult(aPointAndCount, bPointAndCount);
+                let expected = 'B won';
+                expect(compareResult).toEqual(expected)
+            })
+        });
+    });
+    it('should print winner for two inputs', function () {
+        spyOn(console, 'log');
+        let inputA = 'A-J-3-4';
+        let inputB = 'A-J-7';
+        printWinner(inputA, inputB);
+        let expected = 'B won';
+        expect(console.log).toHaveBeenCalledWith(expected);
+    });
 });
-describe('#2 sumPart', function () {
-    it('sumPart', function () {
-        let inputs = ['J','Q','K'];
-        let sumParts = sumPart(inputs);
-        let printParts=30;
-        expect(sumParts).toEqual(printParts);
-    })
-});
-
-describe('#3 sumPart', function () {
-    it('sumPart', function () {
-        let inputs = ['A','A','A','A'];
-        let sumParts = sumPart(inputs);
-        let printParts=0;
-        expect(sumParts).toEqual(printParts);
-    })
-});
-describe('#4 sumPart', function () {
-    it('sumPart', function () {
-        let inputs = ['2','J','A'];
-        let sumParts = sumPart(inputs);
-        let printParts=12;
-
-        expect(sumParts).toEqual(printParts);
-    })
-});
-describe('#5sumPart', function () {
-    it('sumPart', function () {
-        let inputs = ['A','A','2','Q'];
-        let sumParts = sumPart(inputs);
-        let printParts=12;
-        expect(sumParts).toEqual(printParts);
-    })
-});
-describe('#6 sumPart', function () {
-    it('sumPart', function () {
-        let inputs = ['A','Q','K'];
-        let sumParts = sumPart(inputs);
-        let printParts=20;
-        expect(sumParts).toEqual(printParts);
-    })
-});
-
-
-
-describe('#1 dealA1', function () {
-
-    it('dealA1', function () {
-        let sumPart = 16;
-        let inputs = ['2','5','9'];
-        let sum = dealA(inputs, sumPart);
-        let expected =16;
-        expect(sum).toEqual(expected);
-    })
-});
-describe('#2 dealA1', function () {
-    it('dealA1', function () {
-        let sumPart = 30;
-        let inputs = ['J','Q','K'];
-        let sum = dealA(inputs, sumPart);
-        let expected =30;
-        expect(sum).toEqual(expected);
-    })
-});
-describe('#3 dealA1', function () {
-    it('dealA1', function () {
-        let sumPart = 0;
-        let inputs = ['A','A','A','A'];
-        let sum = dealA(inputs, sumPart);
-        let expected =14;
-        expect(sum).toEqual(expected);
-    })
-});
-describe('#4 1dealA1', function () {
-    it('dealA1', function () {
-        let sumPart = 12;
-        let inputs = ['2','J','A'];
-        let sum = dealA(inputs, sumPart);
-        let expected =13;
-        expect(sum).toEqual(expected);
-    })
-});describe('#5 dealA1', function () {
-
-    it('dealA1', function () {
-        let sumPart = 12;
-        let inputs = ['A','A','2','Q'];
-        let sum = dealA(inputs, sumPart);
-        let expected =14;
-
-        expect(sum).toEqual(expected);
-    })
-});
-describe('#6 dealA1', function () {
-    it('dealA1', function () {
-        let sumPart = 20;
-        let inputs = ['A','Q','K'];
-        let sum = dealA(inputs, sumPart);
-        let expected =21;
-        expect(sum).toEqual(expected);
-    })
-});
-
-
-
-describe('#1 comparePokerAB', function () {
-    it('comparePokerAB', function () {
-        let sum1 = 43;
-        let sum2 = 43;
-        let winner = comparePokerAB(sum1, sum2);
-        expect(winner).toEqual('A and B are drawer');
-    })
-});
-
-
-
-
-describe('#2 comparePokerAB', function () {
-
-    let sum1 = 22;
-    let sum2 = 23;
-    it('comparePokerAB', function () {
-        let winner = comparePokerAB(sum1, sum2);
-        expect(winner).toEqual('A and B are drawer');
-    })
-});
-
-describe('#3 comparePokerAB', function () {
-
-    let sum1 = 18;
-    let sum2 = 19;
-    it('comparePokerAB', function () {
-        let winner = comparePokerAB(sum1, sum2);
-        expect(winner).toEqual('B is winner');
-    })
-});
-
-describe('#4 comparePokerAB', function () {
-
-    let sum1 = 18;
-    let sum2 = 18;
-    let inputs11 =['2','9','7'];
-    let inputs12=['2','6','3','7'];
-    it('comparePokerAB', function () {
-        let winner =comparePokerAB(sum1, sum2, inputs11, inputs12);
-        expect(winner).toEqual('A is winner');
-    })
-});
-
-
-describe('#5 comparePokerAB', function () {
-
-    let sum1 = 22;
-    let sum2 = 20;
-
-    it('comparePokerAB', function () {
-        let winner = comparePokerAB(sum1, sum2);
-        expect(winner).toEqual('B is winner');
-    })
-});
-
-
-
-
-
-
-
-
-
-
-
-
