@@ -1,16 +1,15 @@
 /**
- * Created by amber on 16-7-29.
+ * Created by amber on 16-8-4.
  */
 
 let _ = require('lodash');
-
 function getCards(input) {
-    return input.split('-')
+    return input.split('-');
 }
 function convertJkqToNumberCards(formattedInput) {
-    return _.map(formattedInput, card=> {
-        let isJkq = ['J', 'K', 'Q'].includes(card);
-        return isJkq ? '10' : card
+    return _.map(formattedInput, cards=> {
+        let isJkq = _.includes(['J', 'K', 'Q'], cards);
+        return isJkq ? '10' : cards;
     })
 }
 function getPointAndCount(numberCards) {
