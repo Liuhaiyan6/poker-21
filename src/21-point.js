@@ -4,121 +4,52 @@
 
 let _ = require('lodash');
 
-
-function winner(inputs11, inputs12) {
-
-
-    let sumPart1 = sumPart(inputs1);
-    let sumPart2 = sumPart(inputs2);
-
-    let sum1 = dealA(inputs1, sumPart1);
-    let sum2 = dealA(inputs2, sumPart2);
-
-    let winner = comparePokerAB(sum1, sum2, inputs11, inputs12);
-    return winner;
+function getCards(input) {
+    return input.split('-')
 }
-
-function sumPart(inputs) {
-    let a = _.chain(inputs)
-        .filter(x=> x !== 'A')
-        .map(x=> {
-            if (x === 'J' || x === 'Q' || x === 'K') {
-                return '10';
-            }
-            else {
-                return x;
-            }
-        })
-        .value();
-
-    let b = _(a).map(x=> parseInt(x))
-
+function convertJkqToNumberCards(formattedInput) {
+    return _.map(formattedInput, card=> {
+        let isJkq = ['J', 'K', 'Q'].includes(card);
+        return isJkq ? '10' : card
+    })
+}
+function getPointAndCount(numberCards) {
+    let countOfA = _(numberCards).filter(card=> card === 'A').size();
+    let sumPart = _(numberCards).map(element=>element === 'A' ? 1 : parseInt(element))
         .sum();
-    // console.log(b);
-    return b;
-
-
-}
-
-
-function dealA(inputs, sumPart) {
-    let a = _.chain(inputs)
-        .filter(x=>x === 'A')
-        .value();
-    let lengthA = a.length;
-    let partA = 21 - sumPart;
-    let sumPartA;
-    let sum;
-    if (partA < 0) {
-        return sumPart + lengthA;
-    }
-//       console.log(sum);
-//       console.log(sumPartA);
-    if (_.floor(partA / 11) !== 0) {
-        // sumPartA = lengthA;
-        // sum = sumPart + sumPartA;
-        // //  console.log(sum);
-        // return sum;
-        sumPartA = 11 + (lengthA - 1);
-        sum = sumPart + sumPartA;
-        return sum;
-
-    } else {
-        sumPartA = lengthA;
-        sum = sumPart + sumPartA;
-        //  console.log(sum);
-        return sum;
-
-        // sumPartA = 11 + (lengthA - 1);
-        // sum = sumPart + sumPartA;
-        // return sum;
+    let point = _(_.times(countOfA)).reduce(bestPoint=> {
+        let tryPoint = bestPoint + 10;
+        return tryPoint > 21 ? bestPoint : tryPoint;
+    }, sumPart);
+    return {
+        point,
+        count: numberCards.length
     }
 }
-
-
-function comparePokerAB(sum1, sum2, inputs1, inputs2) {
-
-
-    if (sum1 > 21 && sum2 > 21) {
-        return 'A and B are drawer';
-    }
-
-    else if (sum1 === sum2 && inputs1.length > inputs2.length) {
-        return 'A is winner'
-    }
-    else if (sum1 === sum2 && inputs1.length < inputs2.length) {
-        return 'A is winner'
-    }
-    else if (sum1 === sum2 && inputs1.length === inputs2.length) {
-        return 'A and B are drawer';
-    }
-    else if (sum1 < sum2 && sum1 <= 21 && sum2 <= 21) {
-        return 'B is winner';
-    }
-    else if (sum1 > sum2 && sum1 <= 21 && sum2 <= 21) {
-        return 'A is winner';
-    }
-    else if (sum1 === sum2 && inputs1.length < inputs2.length) {
-        return 'A is winner';
-    }
-    else if (sum1 === sum2 && inputs1.length > inputs2.length) {
-        return 'B is winner';
-    }
-    else if (sum1 > 21 && sum2 <= 21) {
-        return 'B is winner'
-    }
-    if (sum1 <= 21 && sum2 > 21) {
-        return "A is winner"
-    }
-
-
+function getComparedResult(aPointAndCount, bPointAndCount) {
+    let {point:aPoint, count:aCount} = aPointAndCount;
+    let {point:bpoint, count:bCount}=bPointAndCount;
+    if (aPoint > 21 && bpoint > 21) return 'tied';
+    if (aPoint > 21) return 'B won';
+    if (bpoint > 21)  return 'A won';
+    if (aPoint > bpoint) return 'A won';
+    if (aPoint < bpoint)  return 'B won';
+    if (aCount > bCount) return 'B won';
+    if (aCount < bCount) return 'A won';
+    return 'tied';
 }
-
+function printWinner(inputA, inputB) {
+    let aPointAndCount = getPointAndCount(convertJkqToNumberCards(getCards(inputA)));
+    let bPointAndCount = getPointAndCount(convertJkqToNumberCards(getCards(inputB)));
+    let result = getComparedResult(aPointAndCount, bPointAndCount);
+    console.log(result);
+}
 module.exports = {
-    sumPart: sumPart,
-    dealA: dealA,
-    comparePokerAB: comparePokerAB,
-
+    getCards: getCards,
+    convertJkqToNumberCards: convertJkqToNumberCards,
+    getPointAndCount: getPointAndCount,
+    printWinner: printWinner,
+    getComparedResult: getComparedResult
 };
 
 
